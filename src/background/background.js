@@ -58,6 +58,11 @@ class BackgroundService {
       console.log('Handling message action:', request.action);
       
       switch (request.action) {
+        case 'ping':
+          console.log('Ping received from popup');
+          sendResponse({ success: true, message: 'Service worker is active' });
+          break;
+          
         case 'generateEmojiSuggestions':
           console.log('Generating emoji suggestions...');
           const suggestions = await this.generateEmojiSuggestions(request.text);

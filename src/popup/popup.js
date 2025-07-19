@@ -132,6 +132,9 @@ class PopupController {
   // 初期データを読み込み
   async initializeData() {
     try {
+      // Service Workerの状態を確認
+      await this.checkServiceWorker();
+      
       // 現在のページがZenn編集ページかチェック
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       
@@ -150,6 +153,48 @@ class PopupController {
       console.error('Initialization error:', error);
       this.showStatus('初期化に失敗しました', 'error');
     }
+  }
+  
+  // Service Workerの状態を確認
+  async checkServiceWorker() {
+    try {
+      console.log('Checking service worker status...');
+      
+      // 簡単なpingメッセージを送信
+      const response = await chrome.runtime.sendMessage({ action: 'ping' });
+      
+      if (response && response.success) {
+        console.log('Service worker is active');
+      } else {
+        console.warn('Service worker response:', response);
+        throw new Error('Service worker not responding correctly');
+      }
+    } catch (error) {
+      console.error('Service worker check failed:', error);
+      
+      // Service Workerを再起動してみる
+      try {
+        await this.restartServiceWorker();
+      } catch (restartError) {
+        console.error('Service worker restart failed:', restartError);
+        throw new Error('バックグラウンドスクリプトとの通信に失敗しました。拡張機能を再読み込みしてください。');
+      }
+    }
+  }
+  
+  // Service Workerを再起動
+  async restartServiceWorker() {
+    console.log('Attempting to restart service worker...');
+    
+    // 短い待機後に再試行
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const response = await chrome.runtime.sendMessage({ action: 'ping' });
+    if (!response || !response.success) {
+      throw new Error('Service worker restart failed');
+    }
+    
+    console.log('Service worker restarted successfully');
   }
   
   // タブを切り替え
@@ -181,15 +226,33 @@ class PopupController {
       this.hideError();
       this.hideSuggestions();
       
+      // Service Workerが生きているか確認
+      try {
+        await this.checkServiceWorker();
+      } catch (serviceWorkerError) {
+        console.error('Service worker check failed:', serviceWorkerError);
+        throw new Error('バックグラウンドサービスに接続できません。拡張機能を再読み込みしてください。');
+      }
+      
       // 現在のタブからテキストを抽出
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        action: 'extractText'
-      });
+      let response;
+      try {
+        response = await chrome.tabs.sendMessage(tab.id, {
+          action: 'extractText'
+        });
+      } catch (contentScriptError) {
+        console.error('Content script error:', contentScriptError);
+        throw new Error('ページからテキストを抽出できません。ページを再読み込みしてください。');
+      }
       
-      if (!response.success) {
-        throw new Error(response.error || 'テキストの抽出に失敗しました');
+      if (!response || !response.success) {
+        throw new Error(response?.error || 'テキストの抽出に失敗しました');
+      }
+      
+      if (!response.text || response.text.trim().length === 0) {
+        throw new Error('記事の内容が見つかりません。記事を書いてから再試行してください。');
       }
       
       // AI APIを呼び出して絵文字を提案

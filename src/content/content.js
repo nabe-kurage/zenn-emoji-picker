@@ -101,6 +101,8 @@ class ZennContentExtractor {
   
   // エディターを見つける
   findEditor() {
+    console.log('Finding editor on page...');
+    
     // 優先順位付きでエディターを検索
     const selectors = [
       '.editor-wrapper .CodeMirror',
@@ -109,32 +111,63 @@ class ZennContentExtractor {
       'textarea.editor',
       '.editor textarea',
       '[data-editor] textarea',
-      '.markdown-editor textarea'
+      '.markdown-editor textarea',
+      '[class*="editor"] textarea',
+      'div[contenteditable="true"]',
+      '[role="textbox"]'
     ];
     
     for (const selector of selectors) {
       const element = document.querySelector(selector);
       if (element) {
+        console.log('Found editor with selector:', selector);
         return element;
       }
     }
     
     // より詳細な検索
+    console.log('Searching all textareas...');
     const allTextareas = document.querySelectorAll('textarea');
+    console.log('Found textareas:', allTextareas.length);
+    
     for (const textarea of allTextareas) {
-      if (textarea.value && textarea.value.length > 50) {
+      console.log('Textarea:', {
+        value: textarea.value?.length || 0,
+        placeholder: textarea.placeholder,
+        className: textarea.className
+      });
+      
+      if (textarea.value && textarea.value.length > 10) {
+        console.log('Using textarea with content');
         return textarea;
       }
     }
     
     // CodeMirrorの検索
+    console.log('Searching for CodeMirror...');
     const codeMirrorElements = document.querySelectorAll('[class*="CodeMirror"]');
+    console.log('Found CodeMirror elements:', codeMirrorElements.length);
+    
     for (const element of codeMirrorElements) {
       if (element.CodeMirror) {
+        console.log('Using CodeMirror element');
         return element;
       }
     }
     
+    // 最後の手段: div[contenteditable]やaria-labelを持つ要素
+    console.log('Searching for contenteditable elements...');
+    const editableElements = document.querySelectorAll('[contenteditable="true"], [aria-label*="編集"], [aria-label*="edit"]');
+    console.log('Found editable elements:', editableElements.length);
+    
+    for (const element of editableElements) {
+      if (element.textContent && element.textContent.length > 10) {
+        console.log('Using contenteditable element');
+        return element;
+      }
+    }
+    
+    console.log('No suitable editor found');
     return null;
   }
   
