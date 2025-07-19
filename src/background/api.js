@@ -53,14 +53,14 @@ export class EmojiAPI {
       messages: [
         {
           role: 'system',
-          content: 'あなたはZenn記事に最適な絵文字を提案するAIアシスタントです。JSON形式で回答してください。'
+          content: 'あなたはZenn記事に最適な絵文字を提案するAIアシスタントです。必ずJSON形式のみで回答してください。説明文は不要です。JSONが途中で切れないよう完全な形で出力してください。'
         },
         {
           role: 'user',
           content: this.buildPrompt(text)
         }
       ],
-      max_tokens: options.maxTokens || 300,
+      max_tokens: options.maxTokens || 500,
       temperature: options.temperature || 0.7
     };
     
@@ -175,7 +175,9 @@ export class EmojiAPI {
         const jsonMatch = content.match(/```json\s*(\{[\s\S]*?\})\s*```/) || content.match(/(\{[\s\S]*\})/);
         if (!jsonMatch) {
           console.error('No JSON found in content:', content);
-          throw new Error('No JSON found in OpenAI response');
+          
+          // フォールバック: 不完全なJSONの場合は手動で修復を試す
+          return this.attemptJsonRepair(content);
         }
         
         try {
@@ -184,7 +186,9 @@ export class EmojiAPI {
           return JSON.parse(jsonStr);
         } catch (extractParseError) {
           console.error('JSON extraction parse failed:', extractParseError);
-          throw new Error('Invalid JSON in OpenAI response');
+          
+          // フォールバック: 不完全なJSONの場合は手動で修復を試す
+          return this.attemptJsonRepair(jsonMatch[1]);
         }
       }
     } catch (error) {
@@ -244,6 +248,85 @@ export class EmojiAPI {
         success: false, 
         message: `API接続テストが失敗しました: ${error.message}` 
       };
+    }
+  }
+  
+  // JSON修復を試行
+  static attemptJsonRepair(jsonStr) {
+    console.log('Attempting to repair JSON:', jsonStr);
+    
+    try {
+      // 基本的な修復を試す
+      let repairedJson = jsonStr.trim();
+      
+      // 最後にカンマがある場合は削除
+      repairedJson = repairedJson.replace(/,\s*$/, '');
+      
+      // 閉じ括弧が不足している場合の修復
+      let openBraces = (repairedJson.match(/\{/g) || []).length;
+      let closeBraces = (repairedJson.match(/\}/g) || []).length;
+      let openBrackets = (repairedJson.match(/\[/g) || []).length;
+      let closeBrackets = (repairedJson.match(/\]/g) || []).length;
+      
+      // 不足している閉じ括弧を追加
+      for (let i = 0; i < openBrackets - closeBrackets; i++) {
+        repairedJson += ']';
+      }
+      for (let i = 0; i < openBraces - closeBraces; i++) {
+        repairedJson += '}';
+      }
+      
+      console.log('Repaired JSON:', repairedJson);
+      return JSON.parse(repairedJson);
+      
+    } catch (repairError) {
+      console.error('JSON repair failed:', repairError);
+      
+      // 最後の手段: 部分的なデータからフォールバックオブジェクトを作成
+      const emojiRegex = /["']emoji["']\s*:\s*["']([^"']+)["']/g;
+      const reasonRegex = /["']reason["']\s*:\s*["']([^"']+)["']/g;
+      
+      const emojis = [];
+      const reasons = [];
+      
+      let match;
+      while ((match = emojiRegex.exec(jsonStr)) !== null) {
+        emojis.push(match[1]);
+      }
+      
+      while ((match = reasonRegex.exec(jsonStr)) !== null) {
+        reasons.push(match[1]);
+      }
+      
+      if (emojis.length > 0) {
+        const result = {
+          main: {
+            emoji: emojis[0] || '📝',
+            reason: reasons[0] || 'APIレスポンスが不完全でした'
+          },
+          sub: []
+        };
+        
+        for (let i = 1; i < Math.min(emojis.length, 3); i++) {
+          result.sub.push({
+            emoji: emojis[i],
+            reason: reasons[i] || 'APIレスポンスが不完全でした'
+          });
+        }
+        
+        // サブ絵文字が足りない場合はデフォルトを追加
+        while (result.sub.length < 2) {
+          result.sub.push({
+            emoji: ['💡', '✨', '🚀', '🎯'][result.sub.length],
+            reason: 'APIレスポンスが不完全でした'
+          });
+        }
+        
+        console.log('Created fallback response:', result);
+        return result;
+      }
+      
+      throw new Error('JSON修復に失敗しました');
     }
   }
   
