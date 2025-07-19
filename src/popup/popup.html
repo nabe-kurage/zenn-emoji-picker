@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zenn Emoji Picker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- ヘッダー -->
+    <header class="header">
+      <h1 class="title">🎨 Emoji Picker</h1>
+      <div class="tabs">
+        <button class="tab-button active" data-tab="suggestions">提案</button>
+        <button class="tab-button" data-tab="favorites">お気に入り</button>
+        <button class="tab-button" data-tab="history">履歴</button>
+      </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- 提案タブ -->
+      <div class="tab-content active" id="suggestions-tab">
+        <div class="status-area">
+          <div class="status-message" id="status-message">
+            記事を分析して絵文字を提案します
+          </div>
+          <div class="loading-spinner hidden" id="loading-spinner">
+            <div class="spinner"></div>
+            <span>分析中...</span>
+          </div>
+        </div>
+
+        <div class="suggestions-container hidden" id="suggestions-container">
+          <!-- メイン絵文字 -->
+          <div class="suggestion-section">
+            <h3 class="section-title">メイン絵文字</h3>
+            <div class="emoji-item main-emoji" id="main-emoji">
+              <div class="emoji-display">
+                <span class="emoji-char" id="main-emoji-char">🎯</span>
+                <button class="copy-button" id="main-copy-btn" title="コピー">📋</button>
+                <button class="favorite-button" id="main-favorite-btn" title="お気に入りに追加">⭐</button>
+              </div>
+              <div class="emoji-reason" id="main-emoji-reason">
+                記事の主要テーマを表現
+              </div>
+            </div>
+          </div>
+
+          <!-- サブ絵文字 -->
+          <div class="suggestion-section">
+            <h3 class="section-title">サブ絵文字</h3>
+            <div class="sub-emojis" id="sub-emojis">
+              <!-- 動的に生成 -->
+            </div>
+          </div>
+
+          <!-- アクションボタン -->
+          <div class="action-buttons">
+            <button class="button secondary" id="regenerate-btn">
+              🔄 もう一度提案
+            </button>
+            <button class="button secondary" id="preview-btn">
+              👀 プレビュー
+            </button>
+          </div>
+        </div>
+
+        <!-- エラー表示 -->
+        <div class="error-container hidden" id="error-container">
+          <div class="error-message" id="error-message">
+            エラーが発生しました
+          </div>
+          <button class="button secondary" id="retry-btn">
+            再試行
+          </button>
+        </div>
+      </div>
+
+      <!-- お気に入りタブ -->
+      <div class="tab-content" id="favorites-tab">
+        <div class="favorites-container">
+          <div class="favorites-header">
+            <h3>お気に入り絵文字</h3>
+            <button class="button small" id="clear-favorites-btn">クリア</button>
+          </div>
+          <div class="favorites-list" id="favorites-list">
+            <!-- 動的に生成 -->
+          </div>
+          <div class="empty-state hidden" id="favorites-empty">
+            <p>お気に入りの絵文字がありません</p>
+            <p class="empty-hint">提案から⭐ボタンで追加できます</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 履歴タブ -->
+      <div class="tab-content" id="history-tab">
+        <div class="history-container">
+          <div class="history-header">
+            <h3>提案履歴</h3>
+            <button class="button small" id="clear-history-btn">クリア</button>
+          </div>
+          <div class="history-list" id="history-list">
+            <!-- 動的に生成 -->
+          </div>
+          <div class="empty-state hidden" id="history-empty">
+            <p>提案履歴がありません</p>
+            <p class="empty-hint">記事を分析すると履歴が保存されます</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+      <div class="footer-actions">
+        <button class="button secondary small" id="settings-btn">⚙️ 設定</button>
+        <button class="button primary" id="analyze-btn">✨ 分析開始</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- トースト通知 -->
+  <div class="toast hidden" id="toast">
+    <span class="toast-message" id="toast-message"></span>
+  </div>
+
+  <!-- プレビューモーダル -->
+  <div class="modal-overlay hidden" id="preview-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>絵文字プレビュー</h3>
+        <button class="modal-close" id="preview-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-title">
+          <span class="preview-emoji" id="preview-emoji">🎯</span>
+          <span class="preview-text">記事タイトルのプレビュー</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="button secondary" id="preview-cancel">キャンセル</button>
+        <button class="button primary" id="preview-copy">この絵文字をコピー</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

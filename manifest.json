@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "Zenn Emoji Picker",
+  "version": "1.0.0",
+  "description": "Zenn記事の内容を分析して最適な絵文字を提案するChrome拡張機能",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "https://zenn.dev/*",
+    "https://your-proxy-server.com/*"
+  ],
+  
+  "background": {
+    "service_worker": "src/background/background.js",
+    "type": "module"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["https://zenn.dev/*/articles/*/edit"],
+      "js": ["src/content/content.js"],
+      "css": ["src/content/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Zenn Emoji Picker",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "options_page": "src/options/options.html",
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://your-proxy-server.com;"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["src/content/*"],
+      "matches": ["https://zenn.dev/*"]
+    }
+  ]
+}
