@@ -92,6 +92,11 @@ function processText(text) {
 
 // メッセージリスナー
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'ping') {
+    sendResponse({ success: true });
+    return true;
+  }
+  
   if (request.action === 'extractText') {
     try {
       const text = extractText();

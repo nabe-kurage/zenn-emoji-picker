@@ -46,6 +46,19 @@ async function analyzeArticle() {
     // 現在のタブからテキストを抽出
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
+    // content scriptが読み込まれているかチェック
+    try {
+      await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
+    } catch (error) {
+      // content scriptを動的に注入
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['content.js']
+      });
+      // 少し待つ
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
     const response = await chrome.tabs.sendMessage(tab.id, {
       action: 'extractText'
     });
