@@ -143,7 +143,8 @@ export class Storage {
     try {
       const result = await chrome.storage.local.get(['settings']);
       return result.settings || {
-        proxyUrl: '',
+        apiType: 'gemini',
+        apiModel: 'gemini-1.5-flash',
         enableCache: true,
         enableHistory: true,
         animationEnabled: true

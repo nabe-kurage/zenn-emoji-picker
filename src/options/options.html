@@ -30,38 +30,35 @@
                   type="password" 
                   id="api-key" 
                   class="input"
-                  placeholder="Claude API または OpenAI API キーを入力"
+                  placeholder="選択したAIサービスのAPIキーを入力"
                 >
                 <button type="button" id="toggle-api-key" class="toggle-button" title="表示/非表示">👁️</button>
               </div>
-              <p class="help-text">
-                APIキーは暗号化して安全に保存されます。Claude API または OpenAI API のキーをご利用ください。
+              <p class="help-text" id="api-key-help">
+                APIキーは暗号化して安全に保存されます。
               </p>
             </div>
 
             <div class="form-group">
-              <label for="proxy-url" class="label">プロキシサーバーURL</label>
-              <input 
-                type="url" 
-                id="proxy-url" 
-                class="input"
-                placeholder="https://your-proxy-server.com"
-              >
+              <label for="api-type" class="label">使用するAI API</label>
+              <select id="api-type" class="select">
+                <option value="gemini">Google Gemini（無料枠あり・推奨）</option>
+                <option value="claude">Claude API</option>
+                <option value="openai">OpenAI API</option>
+              </select>
               <p class="help-text">
-                AI APIを呼び出すためのプロキシサーバーのURLを設定してください。
+                使用するAI APIを選択してください。Geminiは無料枠があるため個人利用におすすめです。
               </p>
             </div>
 
             <div class="form-group">
               <label for="api-model" class="label">AIモデル</label>
               <select id="api-model" class="select">
-                <option value="claude-3-haiku">Claude 3 Haiku（推奨）</option>
-                <option value="claude-3-sonnet">Claude 3 Sonnet</option>
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                <option value="gpt-4">GPT-4</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash（推奨・高速）</option>
+                <option value="gemini-1.5-pro">Gemini 1.5 Pro（高性能）</option>
               </select>
-              <p class="help-text">
-                使用するAIモデルを選択してください。Claude 3 Haikuが速度とコストのバランスが良いです。
+              <p class="help-text" id="api-model-help">
+                使用するAIモデルを選択してください。
               </p>
             </div>
 

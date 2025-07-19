@@ -16,8 +16,10 @@ class OptionsController {
     // API設定
     this.apiKeyInput = document.getElementById('api-key');
     this.toggleApiKeyBtn = document.getElementById('toggle-api-key');
-    this.proxyUrlInput = document.getElementById('proxy-url');
+    this.apiTypeSelect = document.getElementById('api-type');
     this.apiModelSelect = document.getElementById('api-model');
+    this.apiKeyHelp = document.getElementById('api-key-help');
+    this.apiModelHelp = document.getElementById('api-model-help');
     this.testApiBtn = document.getElementById('test-api');
     this.saveApiBtn = document.getElementById('save-api');
     
@@ -60,6 +62,11 @@ class OptionsController {
     // APIキー表示切り替え
     this.toggleApiKeyBtn.addEventListener('click', () => {
       this.toggleApiKeyVisibility();
+    });
+    
+    // APIタイプ変更時の処理
+    this.apiTypeSelect.addEventListener('change', () => {
+      this.updateAPITypeSettings();
     });
     
     // API設定
@@ -147,8 +154,11 @@ class OptionsController {
       }
       
       const settings = await Storage.getSettings();
-      this.proxyUrlInput.value = settings.proxyUrl || '';
-      this.apiModelSelect.value = settings.apiModel || 'claude-3-haiku';
+      this.apiTypeSelect.value = settings.apiType || 'gemini';
+      this.apiModelSelect.value = settings.apiModel || 'gemini-1.5-flash';
+      
+      // APIタイプに応じたUIを更新
+      this.updateAPITypeSettings();
       
       // 機能設定
       this.enableCacheCheckbox.checked = settings.enableCache !== false;
@@ -211,6 +221,61 @@ class OptionsController {
     });
   }
   
+  // APIタイプに応じたUI更新
+  updateAPITypeSettings() {
+    const apiType = this.apiTypeSelect.value;
+    
+    // モデル選択肢を更新
+    this.apiModelSelect.innerHTML = '';
+    
+    // ヘルプテキストを更新
+    let helpText = 'APIキーは暗号化して安全に保存されます。';
+    let modelHelpText = '使用するAIモデルを選択してください。';
+    
+    switch (apiType) {
+      case 'gemini':
+        this.apiModelSelect.innerHTML = `
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash（推奨・高速・無料枠あり）</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro（高性能・無料枠あり）</option>
+        `;
+        helpText += ' Gemini APIは <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a> で取得できます。';
+        modelHelpText += ' Flashは高速で無料枠が豊富、Proはより高性能です。';
+        break;
+        
+      case 'claude':
+        this.apiModelSelect.innerHTML = `
+          <option value="claude-3-haiku-20240307">Claude 3 Haiku（推奨・高速）</option>
+          <option value="claude-3-sonnet-20240229">Claude 3 Sonnet（バランス型）</option>
+          <option value="claude-3-opus-20240229">Claude 3 Opus（最高性能）</option>
+        `;
+        helpText += ' Claude APIは <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a> で取得できます。';
+        modelHelpText += ' Haikuは最も高速で安価です。';
+        break;
+        
+      case 'openai':
+        this.apiModelSelect.innerHTML = `
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo（推奨・安価）</option>
+          <option value="gpt-4">GPT-4（高性能）</option>
+          <option value="gpt-4-turbo">GPT-4 Turbo（最新）</option>
+        `;
+        helpText += ' OpenAI APIは <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a> で取得できます。';
+        modelHelpText += ' GPT-3.5 Turboが最も安価です。';
+        break;
+    }
+    
+    this.apiKeyHelp.innerHTML = helpText;
+    this.apiModelHelp.innerHTML = modelHelpText;
+    
+    // プレースホルダーを更新
+    const placeholders = {
+      gemini: 'AIza... で始まるGemini APIキー',
+      claude: 'sk-ant-... で始まるClaude APIキー',
+      openai: 'sk-... で始まるOpenAI APIキー'
+    };
+    
+    this.apiKeyInput.placeholder = placeholders[apiType] || '選択したAIサービスのAPIキーを入力';
+  }
+  
   // APIキーの表示/非表示を切り替え
   toggleApiKeyVisibility() {
     const isPassword = this.apiKeyInput.type === 'password';
@@ -234,11 +299,11 @@ class OptionsController {
       
       // 設定も一時保存
       const originalSettings = await Storage.getSettings();
-      await Storage.saveSetting('proxyUrl', this.proxyUrlInput.value.trim());
+      await Storage.saveSetting('apiType', this.apiTypeSelect.value);
       await Storage.saveSetting('apiModel', this.apiModelSelect.value);
       
       // API接続テスト
-      const result = await EmojiAPI.testAPIConnection();
+      const result = await EmojiAPI.testAPIConnection(this.apiTypeSelect.value);
       
       if (result.success) {
         this.showToast('API接続テストが成功しました！', 'success');
@@ -250,8 +315,8 @@ class OptionsController {
           await Storage.saveApiKey(originalKey);
         }
         
-        await Storage.saveSetting('proxyUrl', originalSettings.proxyUrl || '');
-        await Storage.saveSetting('apiModel', originalSettings.apiModel || 'claude-3-haiku');
+        await Storage.saveSetting('apiType', originalSettings.apiType || 'gemini');
+        await Storage.saveSetting('apiModel', originalSettings.apiModel || 'gemini-1.5-flash');
       }
       
     } catch (error) {
@@ -268,7 +333,7 @@ class OptionsController {
       this.setButtonLoading(this.saveApiBtn, true);
       
       const apiKey = this.apiKeyInput.value.trim();
-      const proxyUrl = this.proxyUrlInput.value.trim();
+      const apiType = this.apiTypeSelect.value;
       const apiModel = this.apiModelSelect.value;
       
       if (!apiKey) {
@@ -280,7 +345,7 @@ class OptionsController {
       await Storage.saveApiKey(apiKey);
       
       // その他の設定を保存
-      await Storage.saveSetting('proxyUrl', proxyUrl);
+      await Storage.saveSetting('apiType', apiType);
       await Storage.saveSetting('apiModel', apiModel);
       
       this.showToast('API設定を保存しました', 'success');

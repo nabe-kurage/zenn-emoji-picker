@@ -168,41 +168,16 @@ class BackgroundService {
     }
     
     const settings = await Storage.getSettings();
-    const proxyUrl = settings.proxyUrl || 'https://your-proxy-server.com';
-    
-    const prompt = CONFIG.PROMPT_TEMPLATE.replace('{{TEXT_CONTENT}}', text);
-    
-    const requestBody = {
-      model: 'claude-3-haiku',
-      prompt: prompt,
-      max_tokens: 300,
-      temperature: 0.7
-    };
+    const apiType = settings.apiType || 'gemini';
     
     let lastError = null;
     
     // リトライ機能
     for (let attempt = 1; attempt <= CONFIG.API.MAX_RETRIES; attempt++) {
       try {
-        console.log(`API call attempt ${attempt}/${CONFIG.API.MAX_RETRIES}`);
+        console.log(`API call attempt ${attempt}/${CONFIG.API.MAX_RETRIES} using ${apiType}`);
         
-        const response = await fetch(`${proxyUrl}/api/emoji-suggestion`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'X-Extension-Version': chrome.runtime.getManifest().version
-          },
-          body: JSON.stringify(requestBody),
-          signal: AbortSignal.timeout(CONFIG.API.TIMEOUT)
-        });
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`API Error (${response.status}): ${errorText}`);
-        }
-        
-        const result = await response.json();
+        const result = await this.callAPIByType(text, apiType);
         
         // レスポンス形式を検証
         const validatedSuggestions = this.validateAPIResponse(result);
@@ -224,6 +199,173 @@ class BackgroundService {
     // 全ての試行が失敗した場合、フォールバック
     console.warn('All API attempts failed, using fallback');
     return this.getFallbackSuggestions(lastError.message);
+  }
+  
+  // APIタイプに応じた呼び出し
+  async callAPIByType(text, apiType) {
+    const apiKey = await Storage.getApiKey();
+    const prompt = CONFIG.PROMPT_TEMPLATE.replace('{{TEXT_CONTENT}}', text);
+    
+    switch (apiType) {
+      case 'claude':
+        return await this.callClaudeAPI(text, apiKey);
+      case 'openai':
+        return await this.callOpenAIAPI(text, apiKey);
+      case 'gemini':
+        return await this.callGeminiAPI(text, apiKey);
+      default:
+        throw new Error('サポートされていないAPIタイプです');
+    }
+  }
+  
+  // Claude API呼び出し
+  async callClaudeAPI(text, apiKey) {
+    const prompt = CONFIG.PROMPT_TEMPLATE.replace('{{TEXT_CONTENT}}', text);
+    const requestBody = {
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 300,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    };
+    
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(CONFIG.API.TIMEOUT)
+    });
+    
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Claude API Error (${response.status}): ${errorBody}`);
+    }
+    
+    const result = await response.json();
+    const content = result.content?.[0]?.text;
+    
+    if (!content) {
+      throw new Error('Empty response from Claude');
+    }
+    
+    // JSONを抽出
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in Claude response');
+    }
+    
+    return JSON.parse(jsonMatch[0]);
+  }
+  
+  // OpenAI API呼び出し
+  async callOpenAIAPI(text, apiKey) {
+    const prompt = CONFIG.PROMPT_TEMPLATE.replace('{{TEXT_CONTENT}}', text);
+    const requestBody = {
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: 'あなたはZenn記事に最適な絵文字を提案するAIアシスタントです。JSON形式で回答してください。'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      max_tokens: 300,
+      temperature: 0.7
+    };
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(CONFIG.API.TIMEOUT)
+    });
+    
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`OpenAI API Error (${response.status}): ${errorBody}`);
+    }
+    
+    const result = await response.json();
+    const content = result.choices?.[0]?.message?.content;
+    
+    if (!content) {
+      throw new Error('Empty response from OpenAI');
+    }
+    
+    // JSONを抽出
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in OpenAI response');
+    }
+    
+    return JSON.parse(jsonMatch[0]);
+  }
+  
+  // Gemini API呼び出し
+  async callGeminiAPI(text, apiKey) {
+    const prompt = CONFIG.PROMPT_TEMPLATE.replace('{{TEXT_CONTENT}}', text);
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt
+            }
+          ]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 300,
+        responseMimeType: 'application/json'
+      }
+    };
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(CONFIG.API.TIMEOUT)
+    });
+    
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Gemini API Error (${response.status}): ${errorBody}`);
+    }
+    
+    const result = await response.json();
+    const content = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!content) {
+      throw new Error('Empty response from Gemini');
+    }
+    
+    // Geminiは直接JSONを返すはず
+    try {
+      return JSON.parse(content);
+    } catch (parseError) {
+      // JSONが含まれている場合を試す
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No JSON found in Gemini response');
+      }
+      return JSON.parse(jsonMatch[0]);
+    }
   }
   
   // APIレスポンスを検証
