@@ -19,6 +19,7 @@ class BackgroundService {
     
     // メッセージ処理
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      console.log('Background received message:', request);
       this.handleMessage(request, sender, sendResponse);
       return true; // 非同期レスポンス
     });
@@ -54,9 +55,13 @@ class BackgroundService {
   // メッセージハンドラ
   async handleMessage(request, sender, sendResponse) {
     try {
+      console.log('Handling message action:', request.action);
+      
       switch (request.action) {
         case 'generateEmojiSuggestions':
+          console.log('Generating emoji suggestions...');
           const suggestions = await this.generateEmojiSuggestions(request.text);
+          console.log('Generated suggestions:', suggestions);
           sendResponse({ success: true, suggestions });
           break;
           
@@ -85,8 +90,26 @@ class BackgroundService {
           sendResponse({ success: true, stats });
           break;
           
+        case 'removeFavorite':
+          await Storage.removeFavorite(request.emoji);
+          sendResponse({ success: true });
+          break;
+          
+        case 'clearFavorites':
+          // お気に入りクリア機能を追加
+          await chrome.storage.local.remove(['favorites']);
+          sendResponse({ success: true });
+          break;
+          
+        case 'clearHistory':
+          // 履歴クリア機能を追加
+          await chrome.storage.local.remove(['history']);
+          sendResponse({ success: true });
+          break;
+          
         default:
-          sendResponse({ success: false, error: '不明なアクション' });
+          console.warn('Unknown action:', request.action);
+          sendResponse({ success: false, error: '不明なアクション: ' + request.action });
       }
     } catch (error) {
       console.error('Background message error:', error);
@@ -266,13 +289,16 @@ class BackgroundService {
   
   // OpenAI API呼び出し
   async callOpenAIAPI(text, apiKey) {
+    const settings = await Storage.getSettings();
+    const model = settings.apiModel || 'gpt-3.5-turbo';
     const prompt = CONFIG.PROMPT_TEMPLATE.replace('{{TEXT_CONTENT}}', text);
+    
     const requestBody = {
-      model: 'gpt-3.5-turbo',
+      model: model,
       messages: [
         {
           role: 'system',
-          content: 'あなたはZenn記事に最適な絵文字を提案するAIアシスタントです。JSON形式で回答してください。'
+          content: 'あなたはZenn記事に最適な絵文字を提案するAIアシスタントです。必ずJSON形式のみで回答してください。説明文は不要です。'
         },
         {
           role: 'user',
@@ -282,6 +308,8 @@ class BackgroundService {
       max_tokens: 300,
       temperature: 0.7
     };
+    
+    console.log('OpenAI API request:', { model, endpoint: 'https://api.openai.com/v1/chat/completions' });
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -293,25 +321,48 @@ class BackgroundService {
       signal: AbortSignal.timeout(CONFIG.API.TIMEOUT)
     });
     
+    console.log('OpenAI API response status:', response.status);
+    
     if (!response.ok) {
       const errorBody = await response.text();
+      console.error('OpenAI API error body:', errorBody);
       throw new Error(`OpenAI API Error (${response.status}): ${errorBody}`);
     }
     
     const result = await response.json();
+    console.log('OpenAI API full response:', result);
+    
     const content = result.choices?.[0]?.message?.content;
     
     if (!content) {
       throw new Error('Empty response from OpenAI');
     }
     
-    // JSONを抽出
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('No JSON found in OpenAI response');
-    }
+    console.log('OpenAI API content:', content);
     
-    return JSON.parse(jsonMatch[0]);
+    // JSONを抽出して解析
+    try {
+      // まず直接パースを試す
+      return JSON.parse(content.trim());
+    } catch (directParseError) {
+      console.log('Direct JSON parse failed, trying extraction:', directParseError);
+      
+      // JSONブロックを抽出
+      const jsonMatch = content.match(/```json\s*(\{[\s\S]*?\})\s*```/) || content.match(/(\{[\s\S]*\})/);
+      if (!jsonMatch) {
+        console.error('No JSON found in content:', content);
+        throw new Error('No JSON found in OpenAI response');
+      }
+      
+      try {
+        const jsonStr = jsonMatch[1].trim();
+        console.log('Extracted JSON string:', jsonStr);
+        return JSON.parse(jsonStr);
+      } catch (extractParseError) {
+        console.error('JSON extraction parse failed:', extractParseError);
+        throw new Error('Invalid JSON in OpenAI response');
+      }
+    }
   }
   
   // Gemini API呼び出し

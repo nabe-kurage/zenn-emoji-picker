@@ -162,13 +162,31 @@ export class EmojiAPI {
         throw new Error('Empty response from OpenAI');
       }
       
-      // JSONを抽出
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON found in OpenAI response');
-      }
+      console.log('OpenAI response content:', content);
       
-      return JSON.parse(jsonMatch[0]);
+      // JSONを抽出して解析
+      try {
+        // まず直接パースを試す
+        return JSON.parse(content.trim());
+      } catch (directParseError) {
+        console.log('Direct JSON parse failed, trying extraction:', directParseError);
+        
+        // JSONブロックを抽出
+        const jsonMatch = content.match(/```json\s*(\{[\s\S]*?\})\s*```/) || content.match(/(\{[\s\S]*\})/);
+        if (!jsonMatch) {
+          console.error('No JSON found in content:', content);
+          throw new Error('No JSON found in OpenAI response');
+        }
+        
+        try {
+          const jsonStr = jsonMatch[1].trim();
+          console.log('Extracted JSON string:', jsonStr);
+          return JSON.parse(jsonStr);
+        } catch (extractParseError) {
+          console.error('JSON extraction parse failed:', extractParseError);
+          throw new Error('Invalid JSON in OpenAI response');
+        }
+      }
     } catch (error) {
       console.error('OpenAI response parsing error:', error);
       throw new Error('OpenAI APIのレスポンス解析に失敗しました');

@@ -208,16 +208,29 @@ class PopupController {
   
   // 絵文字提案を生成
   async generateSuggestions(text) {
-    const response = await chrome.runtime.sendMessage({
-      action: 'generateEmojiSuggestions',
-      text: text
-    });
+    console.log('Sending message to background script:', { action: 'generateEmojiSuggestions', textLength: text.length });
     
-    if (!response.success) {
-      throw new Error(response.error || '絵文字提案の生成に失敗しました');
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'generateEmojiSuggestions',
+        text: text
+      });
+      
+      console.log('Received response from background:', response);
+      
+      if (!response) {
+        throw new Error('バックグラウンドスクリプトからレスポンスがありません');
+      }
+      
+      if (!response.success) {
+        throw new Error(response.error || '絵文字提案の生成に失敗しました');
+      }
+      
+      return response.suggestions;
+    } catch (error) {
+      console.error('Message sending error:', error);
+      throw error;
     }
-    
-    return response.suggestions;
   }
   
   // 提案を再生成
