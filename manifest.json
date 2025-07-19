@@ -2,12 +2,11 @@
   "manifest_version": 3,
   "name": "Zenn Emoji Picker",
   "version": "1.0.0",
-  "description": "Zenn記事の内容を分析して最適な絵文字を提案するChrome拡張機能",
+  "description": "Zenn記事の内容から最適な絵文字を提案",
   
   "permissions": [
     "storage",
-    "activeTab",
-    "scripting"
+    "activeTab"
   ],
   
   "host_permissions": [
@@ -18,47 +17,20 @@
   ],
   
   "background": {
-    "service_worker": "src/background/background.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
   
   "content_scripts": [
     {
       "matches": ["https://zenn.dev/*/articles/*/edit"],
-      "js": ["src/content/content.js"],
-      "css": ["src/content/content.css"],
-      "run_at": "document_idle"
+      "js": ["content.js"]
     }
   ],
   
   "action": {
-    "default_popup": "src/popup/popup.html",
-    "default_title": "Zenn Emoji Picker",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
+    "default_popup": "popup.html",
+    "default_title": "Zenn Emoji Picker"
   },
   
-  "options_page": "src/options/options.html",
-  
-  "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  },
-  
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com;"
-  },
-  
-  "web_accessible_resources": [
-    {
-      "resources": ["src/content/*"],
-      "matches": ["https://zenn.dev/*"]
-    }
-  ]
+  "options_page": "options.html"
 }
