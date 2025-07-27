@@ -1,372 +1,357 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>Zenn Emoji Picker - 設定</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Zenn Emoji Picker - 設定</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: #f8f9fa;
-      color: #333;
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 40px 20px;
-    }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: #f8f9fa;
+        color: #333;
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+      }
 
-    .container {
-      width: 100%;
-      max-width: 600px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-    }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+      }
 
-    .header {
-      background: linear-gradient(135deg, #3ea8ff 0%, #2563eb 100%);
-      color: white;
-      padding: 32px;
-      text-align: center;
-    }
+      .header {
+        background: linear-gradient(135deg, #3ea8ff 0%, #2563eb 100%);
+        color: white;
+        padding: 32px;
+        text-align: center;
+      }
 
-    .header h1 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
+      .header h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
 
-    .header p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
+      .header p {
+        font-size: 14px;
+        opacity: 0.9;
+      }
 
-    .content {
-      padding: 32px;
-    }
+      .content {
+        padding: 32px;
+      }
 
-    .section {
-      margin-bottom: 32px;
-    }
+      .section {
+        margin-bottom: 32px;
+      }
 
-    .section:last-child {
-      margin-bottom: 0;
-    }
+      .section:last-child {
+        margin-bottom: 0;
+      }
 
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #1f2937;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+      .form-group {
+        margin-bottom: 20px;
+      }
 
-    .form-label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: #374151;
-      margin-bottom: 8px;
-    }
+      .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+      }
 
-    .form-select,
-    .form-input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 14px;
-      background: white;
-      transition: all 0.2s ease;
-    }
+      .form-select,
+      .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        transition: all 0.2s ease;
+      }
 
-    .form-select:focus,
-    .form-input:focus {
-      outline: none;
-      border-color: #3ea8ff;
-      box-shadow: 0 0 0 3px rgba(62, 168, 255, 0.1);
-    }
+      .form-select:focus,
+      .form-input:focus {
+        outline: none;
+        border-color: #3ea8ff;
+        box-shadow: 0 0 0 3px rgba(62, 168, 255, 0.1);
+      }
 
-    .api-info {
-      background: #f8fafc;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
-    }
+      .api-info {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 16px;
+      }
 
-    .api-info h4 {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+      .api-info h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-    .api-info p {
-      font-size: 14px;
-      color: #64748b;
-      margin-bottom: 12px;
-    }
+      .api-info p {
+        font-size: 14px;
+        color: #64748b;
+        margin-bottom: 12px;
+      }
 
-    .api-info a {
-      color: #3ea8ff;
-      text-decoration: none;
-      font-weight: 500;
-    }
+      .api-info a {
+        color: #3ea8ff;
+        text-decoration: none;
+        font-weight: 500;
+      }
 
-    .api-info a:hover {
-      text-decoration: underline;
-    }
+      .api-info a:hover {
+        text-decoration: underline;
+      }
 
-    .pricing {
-      display: flex;
-      gap: 12px;
-      margin-top: 12px;
-    }
+      .pricing {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+      }
 
-    .pricing-item {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px;
-      flex: 1;
-      text-align: center;
-    }
+      .pricing-item {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        flex: 1;
+        text-align: center;
+      }
 
-    .pricing-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
+      .pricing-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
 
-    .pricing-value {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1e293b;
-    }
+      .pricing-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+      }
 
-    .pricing-value.free {
-      color: #059669;
-    }
+      .pricing-value.free {
+        color: #059669;
+      }
 
-    .pricing-value.paid {
-      color: #dc2626;
-    }
+      .pricing-value.paid {
+        color: #dc2626;
+      }
 
-    .button-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
+      .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
 
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
 
-    .btn-primary {
-      background: #3ea8ff;
-      color: white;
-      flex: 1;
-    }
+      .btn-primary {
+        background: #3ea8ff;
+        color: white;
+        flex: 1;
+      }
 
-    .btn-primary:hover:not(:disabled) {
-      background: #2563eb;
-      transform: translateY(-1px);
-    }
+      .btn-primary:hover:not(:disabled) {
+        background: #2563eb;
+        transform: translateY(-1px);
+      }
 
-    .btn-secondary {
-      background: #f3f4f6;
-      color: #374151;
-      border: 2px solid #e5e7eb;
-    }
+      .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: 2px solid #e5e7eb;
+      }
 
-    .btn-secondary:hover:not(:disabled) {
-      background: #e5e7eb;
-      border-color: #d1d5db;
-    }
+      .btn-secondary:hover:not(:disabled) {
+        background: #e5e7eb;
+        border-color: #d1d5db;
+      }
 
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none !important;
-    }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+      }
 
-    .message {
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-top: 16px;
-      font-size: 14px;
-      font-weight: 500;
-    }
+      .message {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-top: 16px;
+        font-size: 14px;
+        font-weight: 500;
+      }
 
-    .message.success {
-      background: #f0fdf4;
-      border: 2px solid #bbf7d0;
-      color: #166534;
-    }
+      .message.success {
+        background: #f0fdf4;
+        border: 2px solid #bbf7d0;
+        color: #166534;
+      }
 
-    .message.error {
-      background: #fef2f2;
-      border: 2px solid #fecaca;
-      color: #dc2626;
-    }
+      .message.error {
+        background: #fef2f2;
+        border: 2px solid #fecaca;
+        color: #dc2626;
+      }
 
-    .badge {
-      display: inline-block;
-      background: #059669;
-      color: white;
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+      .badge {
+        display: inline-block;
+        background: #059669;
+        color: white;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
 
-    .badge.recommended {
-      background: #3ea8ff;
-    }
+      .badge.recommended {
+        background: #3ea8ff;
+      }
 
-    .footer {
-      background: #f8fafc;
-      padding: 20px 32px;
-      text-align: center;
-      border-top: 2px solid #e5e7eb;
-    }
+      .footer {
+        background: #f8fafc;
+        padding: 20px 32px;
+        text-align: center;
+        border-top: 2px solid #e5e7eb;
+      }
 
-    .footer p {
-      font-size: 13px;
-      color: #64748b;
-    }
+      .footer p {
+        font-size: 13px;
+        color: #64748b;
+      }
 
-    .footer a {
-      color: #3ea8ff;
-      text-decoration: none;
-      font-weight: 500;
-    }
+      .footer a {
+        color: #3ea8ff;
+        text-decoration: none;
+        font-weight: 500;
+      }
 
-    .footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🎨 Zenn Emoji Picker</h1>
-      <p>AI を使って記事に最適な絵文字を提案します</p>
-    </div>
-
-    <div class="content">
-      <div class="section">
-        <h2 class="section-title">
-          <span>🤖</span>
-          AI API設定
-        </h2>
-
-        <div class="form-group">
-          <label class="form-label" for="apiType">使用するAI API</label>
-          <select id="apiType" class="form-select">
-            <option value="">APIを選択してください</option>
-            <option value="gemini">Gemini API（推奨・無料枠あり）</option>
-            <option value="claude">Claude API</option>
-            <option value="openai">OpenAI API</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="apiKey">APIキー</label>
-          <input type="password" id="apiKey" class="form-input" placeholder="APIキーを入力してください">
-        </div>
-
-        <div id="apiInfo" class="api-info" style="display: none;">
-          <h4 id="apiTitle">API情報</h4>
-          <p id="apiDescription">API の説明</p>
-          <p><strong>取得方法:</strong> <a id="apiLink" href="#" target="_blank">こちらから取得</a></p>
-          <div class="pricing" id="apiPricing"></div>
-        </div>
-
-        <div class="button-group">
-          <button id="testBtn" class="btn btn-secondary">
-            <span>🔍</span>
-            接続テスト
-          </button>
-          <button id="saveBtn" class="btn btn-primary">
-            <span>💾</span>
-            保存
-          </button>
-        </div>
-
-        <div id="message" style="display: none;"></div>
+      .footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎨 Zenn Emoji Picker</h1>
+        <p>AI を使って記事に最適な絵文字を提案します</p>
       </div>
 
-      <div class="section">
-        <h2 class="section-title">
-          <span>📊</span>
-          使用状況
-        </h2>
+      <div class="content">
+        <div class="section">
+          <h2 class="section-title">
+            <span>🤖</span>
+            AI API設定
+          </h2>
 
-        <div class="api-info">
-          <h4>💡 おすすめ設定</h4>
-          <p>初めてご利用の場合は、<strong>Gemini API</strong> をお勧めします。月間100万トークンまで無料で利用できるため、個人利用には十分です。</p>
-          
-          <div class="pricing">
-            <div class="pricing-item">
-              <div class="pricing-label">Gemini API</div>
-              <div class="pricing-value free">無料枠あり</div>
-            </div>
-            <div class="pricing-item">
-              <div class="pricing-label">Claude API</div>
-              <div class="pricing-value paid">有料のみ</div>
-            </div>
-            <div class="pricing-item">
-              <div class="pricing-label">OpenAI API</div>
-              <div class="pricing-value paid">有料のみ</div>
-            </div>
+          <div class="form-group">
+            <label class="form-label" for="apiType">使用するAI API</label>
+            <select id="apiType" class="form-select">
+              <option value="">APIを選択してください</option>
+              <option value="gemini">Gemini API（推奨・無料枠あり）</option>
+              <option value="claude">Claude API</option>
+              <option value="openai">OpenAI API</option>
+            </select>
           </div>
+
+          <div class="form-group">
+            <label class="form-label" for="apiKey">APIキー</label>
+            <input
+              type="password"
+              id="apiKey"
+              class="form-input"
+              placeholder="APIキーを入力してください"
+            />
+          </div>
+
+          <div id="apiInfo" class="api-info" style="display: none">
+            <h4 id="apiTitle">API情報</h4>
+            <p id="apiDescription">API の説明</p>
+            <p>
+              <strong>取得方法:</strong>
+              <a id="apiLink" href="#" target="_blank">こちらから取得</a>
+            </p>
+            <div class="pricing" id="apiPricing"></div>
+          </div>
+
+          <div class="button-group">
+            <button id="testBtn" class="btn btn-secondary">
+              <span>🔍</span>
+              接続テスト
+            </button>
+            <button id="saveBtn" class="btn btn-primary">
+              <span>💾</span>
+              保存
+            </button>
+          </div>
+
+          <div id="message" style="display: none"></div>
         </div>
+      </div>
+
+      <div class="footer">
+        <p>
+          <a
+            href="https://github.com/nabe-kurage/zenn-emoji-picker"
+            target="_blank"
+            >GitHub</a
+          >
+          | バージョン 1.0.0
+        </p>
       </div>
     </div>
 
-    <div class="footer">
-      <p>
-        <a href="https://github.com/your-repo/zenn-emoji-picker" target="_blank">GitHub</a> |
-        <a href="#" id="docsLink">ドキュメント</a> |
-        バージョン 1.0.0
-      </p>
-    </div>
-  </div>
-
-  <script src="options.js"></script>
-</body>
+    <script src="options.js"></script>
+  </body>
 </html>
