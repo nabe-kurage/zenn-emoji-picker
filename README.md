@@ -1,6 +1,9 @@
 # 🎨 Zenn Emoji Picker (シンプル版)
 
-Zenn記事の内容を分析して最適な絵文字を自動提案するChrome拡張機能です。
+Zenn記事のエディターページで、記事の内容を分析して最適な絵文字を自動提案するChrome拡張機能です。
+
+<img width="1511" height="856" alt="スクリーンショット 2025-07-27 22 08 27" src="https://github.com/user-attachments/assets/479a3e45-5d75-43d5-bb83-413820d61829" />
+
 
 ## ✨ 機能
 
