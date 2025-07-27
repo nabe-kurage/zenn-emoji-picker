@@ -78,9 +78,3 @@ zenn-emoji-picker/
   ]
 }
 ```
-### Claude API / OpenAI API
-- 有料プランが必要
-
----
-
-**推奨**: 初めて使用する場合は無料枠のあるGemini APIをお試しください！
