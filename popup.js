@@ -103,23 +103,26 @@ function displaySuggestions(suggestions) {
   
   // サブ絵文字
   subEmojis.innerHTML = '';
-  suggestions.sub.forEach(sub => {
-    const item = document.createElement('div');
-    item.className = 'emoji-item';
-    item.innerHTML = `
-      <div class="emoji-display">
-        <span class="emoji">${sub.emoji}</span>
+  suggestions.sub.forEach((sub, index) => {
+    const card = document.createElement('div');
+    card.className = 'emoji-card';
+    card.innerHTML = `
+      <div class="emoji-header">
+        <div class="emoji-display">${sub.emoji}</div>
+        <div class="emoji-info">
+          <div class="emoji-label">サブ絵文字 ${index + 1}</div>
+          <div class="emoji-reason">${sub.reason}</div>
+        </div>
         <button class="copy-btn">コピー</button>
       </div>
-      <div class="reason">${sub.reason}</div>
     `;
     
     // コピーボタンのイベント
-    item.querySelector('.copy-btn').addEventListener('click', () => {
+    card.querySelector('.copy-btn').addEventListener('click', () => {
       copyEmoji(sub.emoji);
     });
     
-    subEmojis.appendChild(item);
+    subEmojis.appendChild(card);
   });
   
   showSuggestions();
@@ -130,8 +133,10 @@ async function copyEmoji(emoji) {
   try {
     await navigator.clipboard.writeText(emoji);
     status.textContent = `${emoji} をコピーしました！`;
+    status.style.color = '#059669';
     setTimeout(() => {
       status.textContent = '';
+      status.style.color = '#6b7280';
     }, 2000);
   } catch (err) {
     console.error('コピーエラー:', err);
