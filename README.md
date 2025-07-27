@@ -1,9 +1,13 @@
-# 🎨 Zenn Emoji Picker (シンプル版)
-
-Zenn記事のエディターページで、記事の内容を分析して最適な絵文字を自動提案するChrome拡張機能です。
-
-<img width="1511" height="856" alt="スクリーンショット 2025-07-27 22 08 27" src="https://github.com/user-attachments/assets/479a3e45-5d75-43d5-bb83-413820d61829" />
-
+# Zenn Emoji Picker 
+<div align="center">
+   <img width="100" height="100" alt="icon128" src="https://github.com/user-attachments/assets/71584a9f-852b-4737-a7d0-6e8e97e505dd" />
+</div>
+  
+Zenn記事のエディターページで、記事の内容を分析して最適な絵文字を自動提案するChrome拡張機能です。  
+  
+<div style="margin-top: 24px;">
+   <img width="1511" height="856" alt="スクリーンショット 2025-07-27 22 08 27" src="https://github.com/user-attachments/assets/479a3e45-5d75-43d5-bb83-413820d61829" />
+</div>
 
 ## ✨ 機能
 
