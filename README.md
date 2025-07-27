@@ -5,7 +5,7 @@ Zenn記事の内容を分析して最適な絵文字を自動提案するChrome�
 ## ✨ 機能
 
 - **AI分析による絵文字提案**: 記事の内容を分析し、メイン絵文字1つ+サブ絵文字2つを提案
-- **複数AI対応**: Gemini（無料枠あり）、Claude、OpenAI APIに対応
+- **複数AI対応**: Gemini、Claude、OpenAI APIに対応
 - **テキスト長制限**: 2000文字を超える場合は前半800文字+後半400文字を自動抽出
 - **シンプルな設定**: APIキー登録のみ
 
@@ -23,7 +23,7 @@ Zenn記事の内容を分析して最適な絵文字を自動提案するChrome�
 
 ### APIキーの取得
 
-1. **Gemini API（推奨・無料枠あり）**
+1. **Gemini API**
    - [Google AI Studio](https://aistudio.google.com/app/apikey) でAPIキーを作成
 
 2. **Claude API**
@@ -68,11 +68,6 @@ zenn-emoji-picker/
 - **長い場合**: 前半800文字 + 後半400文字を抽出
 - **最小長**: 10文字以上
 
-### API仕様
-- **Gemini**: gemini-1.5-flash モデル
-- **Claude**: claude-3-haiku-20240307 モデル  
-- **OpenAI**: gpt-3.5-turbo モデル
-
 ### レスポンス形式
 ```json
 {
@@ -83,13 +78,6 @@ zenn-emoji-picker/
   ]
 }
 ```
-
-## 💰 料金
-
-### Gemini API（推奨）
-- **無料枠**: 月15リクエスト/分、100万トークン/月
-- 個人利用なら無料枠で十分
-
 ### Claude API / OpenAI API
 - 有料プランが必要
 
