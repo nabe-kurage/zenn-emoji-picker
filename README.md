@@ -78,9 +78,9 @@ zenn-emoji-picker/
 ### レスポンス形式
 ```json
 {
-  "main": { "emoji": "🌸", "reason": "記事のメインテーマを表現" },
+  "main": { "emoji": "🎩", "reason": "記事のメインテーマを表現" },
   "sub": [
-    { "emoji": "🦋", "reason": "サブ提案1の理由" },
+    { "emoji": "🍀", "reason": "サブ提案1の理由" },
     { "emoji": "✨", "reason": "サブ提案2の理由" }
   ]
 }
