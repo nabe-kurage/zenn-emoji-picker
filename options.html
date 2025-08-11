@@ -313,6 +313,34 @@
               class="form-input"
               placeholder="APIキーを入力してください"
             />
+            <div
+              style="
+                margin-top: 8px;
+                display: flex;
+                gap: 12px;
+                align-items: center;
+              "
+            >
+              <label
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  font-size: 13px;
+                  color: #374151;
+                "
+              >
+                <input type="checkbox" id="persistKey" />
+                永続保存（この端末に保存）
+              </label>
+              <button
+                id="clearKeyBtn"
+                class="btn btn-secondary"
+                style="padding: 8px 12px"
+              >
+                キー削除
+              </button>
+            </div>
           </div>
 
           <div id="apiInfo" class="api-info" style="display: none">

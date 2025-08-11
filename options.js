@@ -9,6 +9,8 @@ const apiInfo = document.getElementById("apiInfo");
 const apiTitle = document.getElementById("apiTitle");
 const apiDescription = document.getElementById("apiDescription");
 const apiLink = document.getElementById("apiLink");
+const persistKeyCheckbox = document.getElementById("persistKey");
+const clearKeyBtn = document.getElementById("clearKeyBtn");
 
 // API情報データ
 const apiInfoData = {
@@ -41,17 +43,19 @@ async function init() {
 // 設定読み込み
 async function loadSettings() {
   try {
-    const result = await chrome.storage.local.get(["apiType", "apiKey"]);
+    // session優先
+    const session = await chrome.storage.session.get(["apiType", "apiKey"]);
+    const local = await chrome.storage.local.get(["apiType", "apiKey"]);
 
-    if (result.apiType) {
-      apiTypeSelect.value = result.apiType;
-    }
+    const apiType = session.apiType || local.apiType || "";
+    const apiKey = session.apiKey || local.apiKey || "";
+    const persisted = Boolean(local.apiKey);
 
-    if (result.apiKey) {
-      apiKeyInput.value = result.apiKey;
-    }
+    if (apiType) apiTypeSelect.value = apiType;
+    if (apiKey) apiKeyInput.value = apiKey;
+    persistKeyCheckbox.checked = persisted;
   } catch (error) {
-    console.error("設定読み込みエラー:", error);
+    showMessage("設定の読み込みに失敗しました", "error");
   }
 }
 
@@ -77,6 +81,7 @@ function updateApiInfo() {
 async function saveSettings() {
   const apiType = apiTypeSelect.value;
   const apiKey = apiKeyInput.value.trim();
+  const persist = persistKeyCheckbox.checked;
 
   if (!apiType) {
     showMessage("APIタイプを選択してください", "error");
@@ -89,10 +94,20 @@ async function saveSettings() {
   }
 
   try {
-    await chrome.storage.local.set({ apiType, apiKey });
+    // まず全てクリア
+    await chrome.storage.session.remove(["apiType", "apiKey"]);
+    await chrome.storage.local.remove(["apiType", "apiKey"]);
+
+    // sessionに保存
+    await chrome.storage.session.set({ apiType, apiKey });
+
+    // 永続保存が選択されていればlocalにも保存
+    if (persist) {
+      await chrome.storage.local.set({ apiType, apiKey });
+    }
+
     showMessage("設定を保存しました", "success");
   } catch (error) {
-    console.error("保存エラー:", error);
     showMessage("設定の保存に失敗しました", "error");
   }
 }
@@ -126,15 +141,27 @@ async function testConnection() {
     if (response.success) {
       showMessage("✅ 接続に成功しました！", "success");
     } else {
-      showMessage(`❌ 接続に失敗しました: ${response.error}`, "error");
+      showMessage("❌ 接続に失敗しました", "error");
     }
   } catch (error) {
-    console.error("接続テストエラー:", error);
     showMessage("❌ 接続テストに失敗しました", "error");
   } finally {
     // ボタン状態リセット
     testBtn.disabled = false;
     testBtn.innerHTML = "<span>🔍</span> 接続テスト";
+  }
+}
+
+// キー削除
+async function clearKey() {
+  try {
+    await chrome.storage.session.remove(["apiType", "apiKey"]);
+    await chrome.storage.local.remove(["apiType", "apiKey"]);
+    apiKeyInput.value = "";
+    persistKeyCheckbox.checked = false;
+    showMessage("APIキーを削除しました", "success");
+  } catch (error) {
+    showMessage("APIキーの削除に失敗しました", "error");
   }
 }
 
@@ -156,6 +183,10 @@ function showMessage(text, type) {
 apiTypeSelect.addEventListener("change", updateApiInfo);
 saveBtn.addEventListener("click", saveSettings);
 testBtn.addEventListener("click", testConnection);
+clearKeyBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  clearKey();
+});
 
 // APIキー入力でエラーメッセージを非表示
 apiKeyInput.addEventListener("input", () => {
