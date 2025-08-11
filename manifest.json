@@ -3,31 +3,28 @@
   "name": "Zenn Emoji Picker",
   "version": "1.0.0",
   "description": "Zenn記事の内容から最適な絵文字を提案",
-  
+
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  
-  "permissions": [
-    "storage",
-    "activeTab",
-    "scripting"
-  ],
-  
+
+  "permissions": ["storage", "activeTab", "scripting"],
+
   "host_permissions": [
     "https://zenn.dev/*",
     "https://api.anthropic.com/*",
     "https://api.openai.com/*",
     "https://generativelanguage.googleapis.com/*"
   ],
-  
+
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
-  
+
   "content_scripts": [
     {
       "matches": ["https://zenn.dev/*"],
@@ -35,7 +32,7 @@
       "run_at": "document_idle"
     }
   ],
-  
+
   "action": {
     "default_popup": "popup.html",
     "default_title": "Zenn Emoji Picker",
@@ -46,6 +43,6 @@
       "128": "icons/icon128.png"
     }
   },
-  
+
   "options_page": "options.html"
 }

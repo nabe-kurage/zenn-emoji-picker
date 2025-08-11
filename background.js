@@ -1,4 +1,5 @@
 // Background Service Worker
+import { makeWildcardPoolOneThird } from "./pool.js";
 
 // メッセージリスナー
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -88,27 +89,62 @@ async function getApiSettings() {
 
 // API呼び出し
 async function callAPI(apiType, apiKey, text) {
-  const prompt = `以下のZenn記事の内容を分析し、エンジニアリングや技術要素を前提とした上で、他の記事と差別化できるような絵文字を選んで提案してください。
+  const pool = makeWildcardPoolOneThird();
+  // Debug: 生成されたプールをログ出力（拡張機能のサービスワーカーログで確認可能）
+  // try {
+  //   console.log("[Zenn Emoji Picker] WILDCARD_POOL", {
+  //     size: pool.emojis.length,
+  //     emojis: pool.emojis,
+  //     categories: Object.keys(pool.categories),
+  //   });
+  //   console.table(pool.emoji2cat);
+  // } catch (_) {}
 
-	※毎回同じ絵文字ではなく、記事の内容に合わせて柔軟に選んでください。  
-	※出力する絵文字は、記事の内容を象徴するものを選んでください。  
-	※単純に「💻」「⚙️」「🔧」といった技術的アイコンだけにならないようにしてください。  
-	※またAIの記事だから「🤖」「🧠」、学習した内容だから「✏️」、アイディアだから「💡」といった単純なものにならないようにしてください。
-	※たとえば、記事の雰囲気（ユーモラス／落ち着いた／創作系など）やテーマを反映する絵文字も検討してください。
-	※表示する３つの絵文字は全て別のものを抽出してください。
-	※サブ提案2の絵文字の絵文字には、理由にできるだけ、学び、システム、学習、知識といったワードを使わないでください。（学習用ブログサービスなので区別化ができていない印象になります）
-	
-	記事内容:
-	${text}
-	
-	以下のJSON形式で出力してください（絵文字・理由ともにオリジナリティを重視してください）:
-	{
-		"main": { "emoji": "ここに最も適切な絵文字", "reason": "記事の主テーマを象徴する、差別化された理由" },
-		"sub": [
-			{ "emoji": "サブ提案1の絵文字", "reason": "サブテーマ1に合った絵文字と理由" },
-			{ "emoji": "サブ提案2の絵文字", "reason": "以外性、ランダム性高く、記事の内容とは繋がりが薄いが、ある意味記事の内容を象徴すると言えなくもない絵文字と理由" }
-		]
-	}`;
+  const prompt = `
+		あなたはZennの記事に合う見出し用絵文字を選ぶアシスタントです。
+		必ず以下の条件を守って3つの異なる絵文字を提案します。
+
+		【選択ルール】
+		- main（1つ目）：制限なし（定番やブラックリスト絵文字も可）
+		- sub[0], sub[1]（2つ目・3つ目）：必ず WILDCARD_POOL 内の絵文字を選ぶ
+		- sub[0] と sub[1] は必ず異なるカテゴリから選ぶ
+		- WILDCARD_POOL に含まれない場合は再選定し、必ず含まれる状態で出力する
+		- 国旗は除外（もし選ばれた場合は別候補に置き換える）
+
+		【WILDCARD_POOL（カテゴリごと）】
+		${JSON.stringify(pool, null, 2)}
+
+		【理由作成ルール】
+		- reason に絵文字は書かない
+		- 「かっこいい」「印象が良い」など抽象表現は禁止
+		- 理由は「本文中の具体的な要素」＋「その要素を比喩的に表す」で書く
+		- 本文中の実際の単語や出来事を必ず含める
+
+		【出力形式（JSONのみ）】
+		{
+			"main": { "emoji": "X", "reason": "..." },
+			"sub": [
+				{ "emoji": "Y", "reason": "..." },
+				{ "emoji": "Z", "reason": "..." }
+			],
+			"_meta": { "tone": "本文から推定したトーン" }
+		}
+
+		【本文】
+		${text}
+
+		【例】
+		入力本文: "深夜のデバッグ作業で偶然バグの原因を発見した話"
+		出力例:
+		{
+			"main": { "emoji": "🔦", "reason": "夜間の作業で隠れたバグを探し当てた様子を懐中電灯に例えた" },
+			"sub": [
+				{ "emoji": "🌋", "reason": "予想外の原因が噴き出した瞬間を火山の爆発になぞらえた" },
+				{ "emoji": "🦉", "reason": "深夜に冷静に観察して解決に至った様子を夜行性の鳥に例えた" }
+			],
+			"_meta": { "tone": "落ち着いたが緊張感のある雰囲気" }
+		}
+`;
 
   switch (apiType) {
     case "gemini":
