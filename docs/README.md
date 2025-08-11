@@ -5,6 +5,7 @@ Zenn Emoji Picker のドキュメント一覧です。
 ## 📋 ドキュメント構成
 
 ### [技術仕様.md](./技術仕様.md)
+
 - アーキテクチャ全体図
 - 技術スタック詳細
 - セキュリティ仕様
@@ -12,12 +13,14 @@ Zenn Emoji Picker のドキュメント一覧です。
 - 拡張性について
 
 ### [コード詳細.md](./コード詳細.md)
+
 - 各ファイルの役割と詳細
 - 主要関数の説明
 - エラーハンドリング戦略
 - パフォーマンス最適化
 
-### [API仕様.md](./API仕様.md)
+### [API 仕様.md](./API仕様.md)
+
 - Gemini API 仕様
 - Claude API 仕様
 - OpenAI API 仕様
@@ -27,28 +30,33 @@ Zenn Emoji Picker のドキュメント一覧です。
 ## 🎯 対象読者
 
 ### 開発者向け
+
 - **技術仕様.md**: システム全体の理解
 - **コード詳細.md**: 実装詳細の理解
-- **API仕様.md**: API統合の理解
+- **API 仕様.md**: API 統合の理解
 
 ### 運用者向け
+
 - **技術仕様.md**: セキュリティ・パフォーマンス
-- **API仕様.md**: API料金・制限の理解
+- **API 仕様.md**: API 料金・制限の理解
 
 ### 新規参加者向け
+
 1. まず **技術仕様.md** でシステム全体を把握
 2. **コード詳細.md** で実装を理解
-3. **API仕様.md** で外部サービス連携を理解
+3. **API 仕様.md** で外部サービス連携を理解
 
 ## 📖 クイックリファレンス
 
 ### 主要技術
+
 - **フレームワーク**: Chrome Extension Manifest V3
 - **言語**: JavaScript (ES2022)
 - **API**: Gemini, Claude, OpenAI
 - **ストレージ**: Chrome Storage API
 
 ### 主要ファイル
+
 ```
 ├── manifest.json       # 拡張機能設定
 ├── background.js       # API呼び出し・データ処理
@@ -59,40 +67,39 @@ Zenn Emoji Picker のドキュメント一覧です。
 ```
 
 ### 主要機能
-- **テキスト抽出**: Zenn編集ページからの記事内容取得
-- **AI分析**: 3つのAI APIによる絵文字提案
-- **UI制御**: ポップアップでの絵文字表示・コピー
-- **設定管理**: APIキー・タイプの保存・テスト
+
+- **テキスト抽出**: Zenn 編集ページからの記事内容取得
+- **AI 分析**: 3 つの AI API による絵文字提案
+- **UI 制御**: ポップアップでの絵文字表示・コピー
+- **設定管理**: API キー・タイプの保存・テスト
 
 ## 🔧 開発支援
 
-### デバッグ方法
-```javascript
-// Background Script
-console.log('Background:', message);
-
-// Content Script  
-console.log('Content:', extractedText);
-
-// Popup Script
-console.log('Popup:', suggestions);
-```
-
 ### 動作確認
+
 1. Chrome の `chrome://extensions/` でデベロッパーモードを有効化
 2. 拡張機能を読み込み
-3. Zenn記事編集ページで動作確認
+3. Zenn 記事編集ページで動作確認
 4. デベロッパーツールでログ確認
 
 ### よくある問題
+
 - **接続エラー**: Content Script の読み込み確認
-- **API エラー**: APIキー・ネットワーク確認  
-- **JSON エラー**: AIレスポンス形式確認
+- **API エラー**: API キー・ネットワーク確認
+- **JSON エラー**: AI レスポンス形式確認
 
 ## 📝 更新履歴
 
+### v1.1.0 (2025)
+
+- 既定保存先を `chrome.storage.session` に変更、永続保存オプションを追加
+- 設定画面に「キー削除」ボタンを追加
+- `background` 経由のキー有無確認 API（`hasApiKey`）を追加
+- 本番ビルドでのログ抑制とエラーメッセージの一般化
+
 ### v1.0.0 (2025)
+
 - 初期リリース
-- Gemini/Claude/OpenAI API対応
-- シンプルなUI実装
+- Gemini/Claude/OpenAI API 対応
+- シンプルな UI 実装
 - 基本的なエラーハンドリング
