@@ -2,8 +2,6 @@
 
 // メッセージリスナー
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("Background received:", request.action);
-
   if (request.action === "testAPI") {
     testAPI(request.apiType, request.apiKey)
       .then((result) => sendResponse(result))
@@ -17,6 +15,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true;
   }
+
+  if (request.action === "hasApiKey") {
+    getApiSettings()
+      .then(({ apiKey, storageSource }) => {
+        sendResponse({
+          success: true,
+          hasApiKey: Boolean(apiKey),
+          storage: storageSource || "none",
+        });
+      })
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
 });
 
 // API接続テスト
@@ -24,10 +35,21 @@ async function testAPI(apiType, apiKey) {
   const testText = "これはテスト記事です。技術について書いています。";
 
   try {
-    await callAPI(apiType, apiKey, testText);
+    // 引数にapiKeyがなければ保存値を利用
+    let resolvedApiType = apiType;
+    let resolvedApiKey = apiKey;
+    if (!resolvedApiKey || !resolvedApiType) {
+      const settings = await getApiSettings();
+      resolvedApiType = resolvedApiType || settings.apiType;
+      resolvedApiKey = resolvedApiKey || settings.apiKey;
+    }
+
+    if (!resolvedApiKey) throw new Error("APIキーが設定されていません");
+    if (!resolvedApiType) throw new Error("APIタイプが設定されていません");
+
+    await callAPI(resolvedApiType, resolvedApiKey, testText);
     return { success: true };
   } catch (error) {
-    console.error("API test failed:", error);
     return { success: false, error: error.message };
   }
 }
@@ -35,18 +57,33 @@ async function testAPI(apiType, apiKey) {
 // 絵文字生成
 async function generateEmojis(text) {
   try {
-    // 設定を取得
-    const result = await chrome.storage.local.get(["apiType", "apiKey"]);
-    if (!result.apiKey) {
-      throw new Error("APIキーが設定されていません");
-    }
+    const { apiType, apiKey } = await getApiSettings();
+    if (!apiKey) throw new Error("APIキーが設定されていません");
+    if (!apiType) throw new Error("APIタイプが設定されていません");
 
-    const suggestions = await callAPI(result.apiType, result.apiKey, text);
+    const suggestions = await callAPI(apiType, apiKey, text);
     return { success: true, suggestions };
   } catch (error) {
-    console.error("Generate emojis failed:", error);
     return { success: false, error: error.message };
   }
+}
+
+// 保存済み設定の取得（session優先、なければlocal）
+async function getApiSettings() {
+  const session = await chrome.storage.session.get(["apiType", "apiKey"]);
+  if (session.apiKey) {
+    return {
+      apiType: session.apiType,
+      apiKey: session.apiKey,
+      storageSource: "session",
+    };
+  }
+  const local = await chrome.storage.local.get(["apiType", "apiKey"]);
+  return {
+    apiType: local.apiType,
+    apiKey: local.apiKey,
+    storageSource: local.apiKey ? "local" : undefined,
+  };
 }
 
 // API呼び出し
@@ -105,7 +142,7 @@ async function callGemini(apiKey, prompt) {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Gemini API Error: ${error}`);
+    throw new Error(`Gemini API Error`);
   }
 
   const result = await response.json();
@@ -136,7 +173,7 @@ async function callClaude(apiKey, prompt) {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Claude API Error: ${error}`);
+    throw new Error(`Claude API Error`);
   }
 
   const result = await response.json();
@@ -170,7 +207,7 @@ async function callOpenAI(apiKey, prompt) {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`OpenAI API Error: ${error}`);
+    throw new Error(`OpenAI API Error`);
   }
 
   const result = await response.json();
@@ -202,7 +239,7 @@ function parseJSON(content) {
     }
 
     // フォールバック
-    console.warn("JSON解析失敗、フォールバックを使用:", content);
+    // 解析失敗時は詳細をログに出さない
     return {
       main: { emoji: "📝", reason: "JSON解析に失敗しました" },
       sub: [
@@ -212,5 +249,3 @@ function parseJSON(content) {
     };
   }
 }
-
-console.log("Zenn Emoji Picker: Background script loaded");
