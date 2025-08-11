@@ -318,7 +318,6 @@ export const CATEGORIES = {
     "🐞",
     "🪳",
     "🪰",
-    "🪴",
   ],
   food_drink: [
     "🍏",
@@ -530,7 +529,6 @@ export const CATEGORIES = {
     "📿",
     "💍",
     "💎",
-    "📱",
   ],
   symbols: [
     "❤️",
