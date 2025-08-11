@@ -36,12 +36,19 @@ Zenn記事のエディターページで、記事の内容を分析して最適�
 
    - [Google AI Studio](https://aistudio.google.com/app/apikey) で API キーを作成
 
-2. **Claude API**
+2. ~~**Claude API**~~ (現在動かないので修正予定)
 
    - [Anthropic Console](https://console.anthropic.com/) で API キーを作成
 
 3. **OpenAI API**
+
    - [OpenAI Platform](https://platform.openai.com/api-keys) で API キーを作成
+
+## ⚠️ 既知の問題
+
+- 現在、意図せずClaude API では動作しない状態になっています。近日中に修正予定です。
+  - 当面は Gemini または OpenAI の利用を推奨します。
+
 
 ### 設定手順
 
